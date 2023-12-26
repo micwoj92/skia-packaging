@@ -1,0 +1,30 @@
+pkgname=python-skia-pathops
+_pkgname=${pkgname#python-}
+pkgver=0.8.0.post1
+pkgrel=1
+pkgdesc='Python bindings for the Skia library’s Path Ops (wheel)'
+arch=(x86_64)
+url="https://github.com/fonttools/$_pkgname"
+license=(BSD)
+depends=(python skia-git) #requires modified skia-git, not on aur atm
+makedepends=(cython python-setuptools-scm)
+checkdepends=(python-pytest)
+options=(!strip)
+source=("https://files.pythonhosted.org/packages/source/${_pkgname::1}/$_pkgname/$_pkgname-$pkgver.zip")
+sha256sums=('a056249de2f61fa55116b9ee55513c6a36b878aee00c91450e404d1606485cbb')
+
+build() {
+    cd "$_pkgname-$pkgver"
+    BUILD_SKIA_FROM_SOURCE=0 python setup.py build
+    python setup.py build_ext --inplace
+}
+
+check() {
+    cd "$_pkgname-$pkgver"
+    PYTHONPATH="src/python" pytest
+}
+
+package() {
+    cd "$_pkgname-$pkgver"
+    python setup.py install --root="$pkgdir" --optimize=1 --skip-build
+}
